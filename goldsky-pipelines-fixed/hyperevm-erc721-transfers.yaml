@@ -1,0 +1,16 @@
+name: hyperevm-erc721-transfers
+apiVersion: 3
+sources:
+  hyperevm.erc721_transfers:
+    dataset_name: hyperevm.erc721_transfers
+    type: dataset
+    version: 1.2.0
+transforms: {}
+sinks:
+  postgres_hyperevm_erc721_transfers:
+    type: postgres
+    table: hyperevm_erc721_transfers
+    schema: public
+    secret_name: HOSTED_POSTGRES_CMEOC6UIE0
+    description: 'Postgres sink for: hyperevm.erc721_transfers'
+    from: hyperevm.erc721_transfers

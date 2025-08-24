@@ -1,0 +1,16 @@
+name: hyperevm-raw-logs
+apiVersion: 3
+sources:
+  hyperevm.raw_logs:
+    dataset_name: hyperevm.raw_logs
+    type: dataset
+    version: 1.0.0
+transforms: {}
+sinks:
+  postgres_hyperevm_raw_logs:
+    type: postgres
+    table: hyperevm_raw_logs
+    schema: public
+    secret_name: HOSTED_POSTGRES_CMEOC6UIE0
+    description: 'Postgres sink for: hyperevm.raw_logs'
+    from: hyperevm.raw_logs

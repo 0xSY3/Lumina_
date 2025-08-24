@@ -1,0 +1,16 @@
+name: hyperevm-erc20-transfers
+apiVersion: 3
+sources:
+  hyperevm.erc20_transfers:
+    dataset_name: hyperevm.erc20_transfers
+    type: dataset
+    version: 1.2.0
+transforms: {}
+sinks:
+  postgres_hyperevm_erc20_transfers:
+    type: postgres
+    table: hyperevm_erc20_transfers
+    schema: public
+    secret_name: HOSTED_POSTGRES_CMEOC6UIE0
+    description: 'Postgres sink for: hyperevm.erc20_transfers'
+    from: hyperevm.erc20_transfers

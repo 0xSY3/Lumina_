@@ -1,0 +1,16 @@
+name: hyperevm-raw-blocks
+apiVersion: 3
+sources:
+  hyperevm.raw_blocks:
+    dataset_name: hyperevm.raw_blocks
+    type: dataset
+    version: 1.0.0
+transforms: {}
+sinks:
+  postgres_hyperevm_raw_blocks:
+    type: postgres
+    table: hyperevm_raw_blocks
+    schema: public
+    secret_name: HOSTED_POSTGRES_CMEOC6UIE0
+    description: 'Postgres sink for: hyperevm.raw_blocks'
+    from: hyperevm.raw_blocks

@@ -1,0 +1,16 @@
+name: hyperevm-balances
+apiVersion: 3
+sources:
+  hyperevm.balances:
+    dataset_name: hyperevm.balances
+    type: dataset
+    version: 1.1.0
+transforms: {}
+sinks:
+  postgres_hyperevm_balances:
+    type: postgres
+    table: hyperevm_balances
+    schema: public
+    secret_name: HOSTED_POSTGRES_CMEOC6UIE0
+    description: 'Postgres sink for: hyperevm.balances'
+    from: hyperevm.balances

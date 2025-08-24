@@ -1,0 +1,100 @@
+  const fetchBlockchainData = async (isRetry = false) => {
+    try {
+      if (!isRetry) {
+        setIsLoadingChainData(true);
+        setIsRefreshing(true);
+      }
+      setConnectionStatus('connecting');
+      
+      console.log(`🔍 Fetching data from ${getCurrentChain().name}... (Attempt ${retryCount + 1})`);
+      
+      // Fetch data from our API endpoints
+      const [blocksResponse, transactionsResponse] = await Promise.all([
+        fetch('/api/blocks?limit=10'),
+        fetch('/api/transactions?limit=20')
+      ]);
+      
+      if (!blocksResponse.ok || !transactionsResponse.ok) {
+        throw new Error('Failed to fetch blockchain data');
+      }
+      
+      const blocksData = await blocksResponse.json();
+      const transactionsData = await transactionsResponse.json();
+      
+      setConnectionStatus('connected');
+      console.log(`✅ Connected to ${getCurrentChain().name}`);
+      
+      // Process blocks data
+      const blocks = blocksData.blocks || [];
+      const transactions = transactionsData.transactions || [];
+      
+      if (blocks.length > 0) {
+        setLatestBlocks(blocks);
+        setLatestBlock(blocks[0].number || 0);
+        console.log(`📦 Loaded ${blocks.length} blocks`);
+      }
+      
+      if (transactions.length > 0) {
+        setRecentTransactions(transactions);
+        setTotalTransactions(transactions.length);
+        console.log(`💸 Loaded ${transactions.length} transactions`);
+      }
+      
+      // Calculate average block time from blocks
+      let avgBlockTime = 0;
+      if (blocks.length >= 2) {
+        const timeDiffs = [];
+        for (let i = 0; i < Math.min(blocks.length - 1, 5); i++) {
+          const timeDiff = blocks[i].timestamp - blocks[i + 1].timestamp;
+          if (timeDiff > 0) timeDiffs.push(timeDiff);
+        }
+        avgBlockTime = timeDiffs.length > 0 ? 
+          timeDiffs.reduce((a, b) => a + b, 0) / timeDiffs.length : 0;
+      }
+      
+      // Calculate simple TPS based on recent transactions
+      const currentTPS = transactions.length > 0 ? transactions.length / 60 : 0; // rough estimate
+      
+      // Update network stats
+      setNetworkStats({
+        latestBlock: blocks[0]?.number || 0,
+        gasPrice: '0.00',
+        totalTransactions: transactions.length,
+        avgBlockTime: avgBlockTime,
+      });
+      
+      // Update state
+      setAvgBlockTime(avgBlockTime);
+      setCurrentTPS(currentTPS);
+      setCurrentGasPrice(0);
+      setRetryCount(0);
+      setLastUpdateTime(new Date());
+      
+      console.log(`✅ Successfully loaded blockchain data:`, {
+        blocks: blocks.length,
+        transactions: transactions.length,
+        latestBlock: blocks[0]?.number || 0,
+        avgBlockTime: avgBlockTime.toFixed(1) + 's',
+        currentTPS: currentTPS.toFixed(2)
+      });
+
+    } catch (error: any) {
+      console.error('❌ Error fetching blockchain data:', error?.message);
+      setConnectionStatus('disconnected');
+      
+      // Retry logic with exponential backoff
+      if (retryCount < MAX_RETRIES) {
+        const delay = Math.min(1000 * Math.pow(2, retryCount), 10000); // Cap at 10s
+        console.log(`🔄 Retrying in ${delay/1000}s... (${retryCount + 1}/${MAX_RETRIES})`);
+        setRetryCount(prev => prev + 1);
+        setTimeout(() => {
+          fetchBlockchainData(true);
+        }, delay);
+      } else {
+        console.error('Max retries reached. Please check your connection.');
+      }
+    } finally {
+      setIsLoadingChainData(false);
+      setIsRefreshing(false);
+    }
+  };
